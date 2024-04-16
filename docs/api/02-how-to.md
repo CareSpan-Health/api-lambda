@@ -27,78 +27,21 @@ The example is to get a list of Care Plan (cat `36`) from the EHR database and r
 
 ```typescript
 import { APIGatewayProxyEvent } from "aws-lambda";
-import middy from "@middy/core";
-import httpEventNormalizer from "@middy/http-event-normalizer";
-import httpErrorHandler from "@middy/http-error-handler";
-import httpResponseSerializer from "@middy/http-response-serializer";
-
-import { transpileSchema } from "@middy/validator/transpile";
 import getQuerySchema from "src/middleware/schema/input/getCarePlanRecordSchema";
-import {
-    getResponseFhirBundleSchema as getResponseSchema,
-} from "@cscore/cs-api";
+import { getResponseFhirBundleSchema as getResponseSchema } from "@cscore/cs-api"
+import HanderWrapper from "src/middleware/HandlerWrapper";
 
-import {
-    MwAccessDefault,
-    MwCleanUpProcess,
-    MwEventTracking,
-    MwValidateProcess,
-    MwSchemaValidator,
-} from "@cscore/cs-api";
-import getCsDb from "src/model/CsDb";
-
-export const getCarePlanHandler = async (
+const getCarePlanHandler = async (
     event: APIGatewayProxyEvent
 ): Promise<any> => {
     // ...
 };
 
-export const handler = middy(getCarePlanHandler)
-    .use(MwValidateProcess())
-    .use(
-        httpResponseSerializer({
-            serializers: [
-                {
-                    regex: /^application\/xml$/,
-                    serializer: ({ body }) => `<message>${body}</message>`,
-                },
-                {
-                    regex: /^application\/json$/,
-                    serializer: ({ body }) => JSON.stringify(body),
-                },
-                {
-                    regex: /^text\/(plain|csv)$/,
-                    serializer: ({ body }) => body,
-                },
-            ],
-            defaultContentType: "application/json",
-        })
-    )
-    .use(
-        MwSchemaValidator({
-            eventSchema: getQuerySchema(transpileSchema),
-            responseSchema: getResponseSchema(transpileSchema),
-        })
-    )
-    .use(httpEventNormalizer())
-    // .use(httpHeaderNormalizer())
-    .use(
-        MwCleanUpProcess({
-            parseAsBundled: true, // always loop through event.body.bundle
-            dbConnector: getCsDb(),
-        })
-    )
-    .use(
-        MwAccessDefault({
-            dbConnector: getCsDb(),
-        })
-    )
-    .use(
-        MwEventTracking({
-            dbConnector: getCsDb(),
-        })
-    )
-    .use(httpErrorHandler());
+// wrap the middlewares
+export const handler = HanderWrapper.wrapForFhir(getCarePlanHandler, {
+    inputSchema: getQuerySchema,
+    outputSchema: getResponseSchema,
+});
 ```
 
 The boiler plate imports all the must have information
@@ -119,7 +62,7 @@ Therefore, we will need to get the patient information
 
 ```typescript
 // update handler
-export const getCarePlanHandler = async (
+const getCarePlanHandler = async (
     event: APIGatewayProxyEvent
 ): Promise<any> => {
     const patientGuid = event?.queryStringParameters?.subject;

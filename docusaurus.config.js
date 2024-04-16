@@ -14,12 +14,12 @@ const config = {
   url: 'https://carespan-health.github.io',
   // Set the /<baseUrl>/ pathname under which your site is served
   // For GitHub pages deployment, it is often '/<projectName>/'
-  baseUrl: '/api/',
+  baseUrl: '/api-lambda/',
 
   // GitHub pages deployment config.
   // If you aren't using GitHub pages, you don't need these.
   organizationName: 'carespan-health', // Usually your GitHub org/user name.
-  projectName: 'api', // Usually your repo name.
+  projectName: 'api-lambda', // Usually your repo name.
   trailingSlash: false,
 
   onBrokenLinks: 'throw',

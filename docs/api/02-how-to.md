@@ -48,7 +48,18 @@ The boiler plate imports all the must have information
 
 You can copy the boiler plate and repalce `CarePlan` with something else
 
-Do note one thing, here we need think about the inputs. In this case, we will allow patient guid as `subject`. `getQuerySchema` needs to be updated to allow `subject`
+:::info
+
+Do note one thing, here we need think about the inputs. In this case, we will allow patient guid as `subject`. `getQuerySchema` needs to be updated to allow `subject`.
+
+If you want to use the default input (only allowing 2 query parmeters: `by-id` and `client-id`), you may use `getQuerySchema` ffrom `@cscore/cs-api`
+
+
+```typescript
+import { getQuerySchema, getResponseFhirBundleSchema as getResponseSchema } from "@cscore/cs-api";
+
+```
+:::
 
 #### 2. Fetch records based on input
 
@@ -65,6 +76,7 @@ Therefore, we will need to get the patient information
 const getCarePlanHandler = async (
     event: APIGatewayProxyEvent
 ): Promise<any> => {
+    // highlight-start
     const patientGuid = event?.queryStringParameters?.subject;
     const including = [36];
 
@@ -83,6 +95,7 @@ const getCarePlanHandler = async (
     });
 
     return response;
+    // highlight-end
 };
 
 ```
@@ -136,8 +149,10 @@ class CarePlanLambda extends EhrLambda {
     async run(params) {
         const records = this.recordMap;
         const bundle: Bundle = await this.getBundleFromRecords(records);
+        // highlight-start
         // when there is no error, call the tracking function
         await this.trackEvent(records, "read"); // the event detail is defined by the vo - in this case: src/vo/records/CarePlanRecord.ts
+        // highlight-end
         return this.renderSuccess(bundle);
     }
 }

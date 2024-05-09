@@ -17,7 +17,7 @@ This how-to will describe how we write various lambdas
 
 There are [CareSpan NPM packages](https://carespan-health.github.io/ts-npm/docs/intro) that you will need to install in your project
 
-### Example
+### Get from EHR
 
 #### 1. Create a ehr handler
 
@@ -69,6 +69,14 @@ In our case, we will need to:
 
 * Get the patient's cat `36`
 
+:::info
+The below example assumes 2 things
+
+* the CarePlan Value Object is created
+* CarePlan.toFhir is built
+
+:::
+
 Therefore, we will need to get the patient information
 
 ```typescript
@@ -99,6 +107,7 @@ const getCarePlanHandler = async (
 };
 
 ```
+
 
 #### Return data in FHIR
 
@@ -158,3 +167,18 @@ class CarePlanLambda extends EhrLambda {
 }
 
 ```
+
+#### 4. Confirming toFhir is built
+
+
+
+### Add record to EHR
+
+To add to the EHR, we can follow the boiler plate from the top and build on it
+
+The steps would be:
+
+1. Post FHIR resouce as body
+1. Parse the FHIR resource and generate a CS object
+1. Save the CS object in the database
+
